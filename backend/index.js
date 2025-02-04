@@ -1,37 +1,20 @@
-import express, { request, response } from "express";
+import express, { json, request, response } from "express";
 import { PORT, mongoDBURL } from "./config.js";
 import mongoose from "mongoose";
-import { Book } from "./models/bookModel.js";
+import bookRouter from "./routes/booksRoute.js";
+import cors from "cors";
 
 const app = express();
+app.use(express.json());
+
+app.use(cors());
 
 app.get("/", (request, response) => {
   console.log(request);
-  return response.status(225).send("Good");
+  return response.status(225).send("Good Vibes");
 });
-app.post("/book", async (request, response) => {
-  try {
-    if (
-      !request.body.title ||
-      !request.body.author ||
-      !request.body.publishedYear
-    ) {
-      return response.status(400).send({ message: "send all required fields" });
-    }
 
-    const newBook = {
-      title: request.body.title,
-      author: request.body.author,
-      publishedYear: request.body.publishedYear,
-    };
-
-    const book = await Book.create(newBook);
-    return response.status(201).send(book);
-  } catch (error) {
-    console.log(error.message);
-    response.status(500).send({ message: error.message });
-  }
-});
+app.use("/", bookRouter);
 
 mongoose
   .connect(mongoDBURL)
@@ -42,5 +25,5 @@ mongoose
     });
   })
   .catch((error) => {
-    console.log("error");
+    console.log("error"); //error connecting to database
   });
